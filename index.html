@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="telephone=no" name="format-detection">
+    <meta content="email=no" name="format-detection">
+    <title>接好运</title>
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js" charset="utf-8"></script>
+    <!-- 滚动条 -->
+    <script type="text/javascript" src="js/pace.min.js" defer="defer" charset="utf-8"></script>
+    <!-- 移动端字体转化 -->
+    <script type="text/javascript">
+	    function initScale(){
+		    var iWidth=document.documentElement.getBoundingClientRect().width;
+		    iWidth=iWidth>750?750:iWidth;
+		    document.getElementsByTagName("html")[0].style.fontSize=iWidth/3.75+"px";
+	    }
+	    window.onresize=function(){
+	        initScale();
+	    }
+	    initScale();
+	</script>
+</head>
+<body>
+	<div id="body"></div>
+	<div class="swiper-container">
+		<div class="swiper-wrapper">			
+			<div class="swiper-slide swiper-no-swiping">
+				<div class="model-index" style="width: 100%;height: 100%;position: relative;">
+					<img class='logo pull-left' src="./img/logo.png"/>
+					<div id="audio_btn" class="pull-right music">
+						<img class="icon-music" src="./img/icon_music.png" />
+						<audio src="./img/bg.mp3" id="media" preload="true" autoplay="" loop=""></audio>
+					</div>
+					<div class="model-title"></div>
+					<div class="model-tong">
+						<img class="mt-leg mt-leg1" src="img/pic_666.png"  alt=""/>
+            			<img class="mt-leg mt-leg2" src="img/pic_ffzw.png" alt=""/>
+            			<img class="mt-leg mt-leg3" src="img/pic_gyz.png" alt=""/>
+            			<img class="mt-leg mt-leg4" src=
+
+            			"img/pic_lsj.png"  alt=""/>
+            			<img class="mt-leg mt-leg5" src="img/pic_yqmm.png"  alt=""/>
+            			<img class="mt-leg mt-leg6" src="img/pic_yqrx.png"  alt=""/>
+					</div>
+					<div class="model-person"></div>
+					<div class="model-word"><img src="img/img_qp.png" alt=""/></div>
+					<div class="slide-next"></div>
+					<div class="model-cloud"></div>
+				</div>
+			</div>
+			<!-- 游戏界面 -->
+			<div class="swiper-slide swiper-no-swiping">
+            	<iframe src="drop.html" id="drop" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+            <!-- 结束界面 -->
+			<div class="swiper-slide swiper-no-swiping">
+            	<iframe src="prizes.html" id="prizes" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+		</div>
+	</div>
+	<script src="js/index.js"></script>
+	<script src="js/swiper.min.js"></script>
+	<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script type="text/javascript">
+		var swiper = new Swiper('.swiper-container', {
+	        pagination: '.swiper-pagination',
+	        paginationClickable: true,
+	        direction: 'vertical',
+	        noSwiping : true,
+	        speed:800
+	    });
+		var audio=$("audio")[0];
+	    var openid = getUrlKey('openid');
+
+	    function onBridgeReady(){
+			WeixinJSBridge.call('hideOptionMenu');
+		}
+		if (typeof WeixinJSBridge == "undefined"){
+		    if( document.addEventListener ){
+		        document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+		    }else if (document.attachEvent){
+		        document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+		        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+		    }
+		}else{
+		    onBridgeReady();
+		}
+
+	    $('.slide-next').click(function(){
+	    	$.ajax({
+				type: 'POST',
+				url: 'http://nj.im-cc.com/piccsurvey/GetGoodLuck/isDraw',
+				data: {
+					openid: openid
+				},
+				success:function(data){
+					console.log(data,68);
+				}
+			})
+	    })
+	    $(function(){	
+		    autoMusic();
+		  	// 音乐播放器
+		  	$(".icon-music").click( function(e){
+               autoMusic();
+            })
+	    })
+
+	  	function autoMusic() {
+	  		$("#audio_btn").toggleClass("rotate");
+           	if(audio.paused===true){
+				//未播放
+				playFun();
+			}else{
+				//播放中
+				pauseFun();
+			}
+  		}
+
+	    //第二次加载游戏页
+	    function again(){
+	    	var drop=document.getElementById('drop');
+	    	drop.contentWindow.reload();
+	    }
+
+	    function resultId(prizesId, scoreEnd){ 
+	    	// 调用drop页的游戏结束结果
+		    var prizes=document.getElementById('prizes');
+		    prizes.contentWindow.showImg(prizesId, scoreEnd); //传值到奖品页
+		  	
+	    }
+
+	    function getUrlKey(name){
+        	return decodeURIComponent((new RegExp('[?|&]'+name+'='+'([^&;]+?)(&|#|;|$)').exec(location.href)||[,""])[1].replace(/\+/g,'%20'))||null;
+    	}
+
+    	
+		//加载完毕播放
+		document.addEventListener("WeixinJSBridgeReady", function () {
+			playFun();
+		}, false);
+		window.addEventListener("load",function(){
+			if(audio.paused===true){
+				document.addEventListener("touchstart",playTouch);
+			}
+		});
+
+
+		// 播放处理
+		function playFun(){
+			audio.play();
+			
+		}
+		//暂停处理
+		function pauseFun(){
+			audio.pause();
+			
+		}
+		// 处理不能自动播放的奇葩手机
+		function playTouch(){
+			playFun();
+			document.removeEventListener("touchstart",playTouch);
+		}
+	</script>
+</body>
+</html>

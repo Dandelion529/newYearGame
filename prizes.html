@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>游戏结束开始</title>
+		<link rel="stylesheet" type="text/css" href="css/reset.css">
+		<link rel="stylesheet" type="text/css" href="css/drop.css">
+		<!-- <script src="js/jquery.js" type="text/javascript"></script> -->
+		<script src="js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript">
+		    function initScale(){
+			    var iWidth=document.documentElement.getBoundingClientRect().width;
+			    iWidth=iWidth>750?750:iWidth;
+			    document.getElementsByTagName("html")[0].style.fontSize=iWidth/3.75+"px";
+		    }
+		    window.onresize=function(){
+		        initScale();
+		    }
+		    initScale();
+		</script>
+	</head>
+	<body>
+		<div class="prizesBox">
+			<img class='logo pull-left' src="./img/logo.png"/>
+			<img class="icon-music pull-right" src="./img/icon_music.png" />
+			<div class="box">
+				<div class="boxTitle">恭喜您获得<span id="scoreNum1" class="num"></span>&nbsp;福气值</div>
+				<p class="boxDes">快来看一下你的2018狗年运势</p>
+				<img id="imgTypes" class="boxImg" src="" />
+				<div class="tryone"></div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$('.tryone').on('click',function(){
+				parent.again(); //在玩一次
+				parent.swiper.slidePrev();
+			})
+
+			function showImg(prizesId, scoreEnd){
+		      // alert("我是游戏结束页");
+		      console.log("scoreEnd", scoreEnd);
+		      $("#scoreNum1").text(scoreEnd);
+		      // 判断游戏结束页面显示对应的结果图以及得分显示
+				if(prizesId == 1) {
+					// 获取当前的分数
+					$('#imgTypes').attr('src','./img/img_bcbp.png');
+				}
+				if(prizesId == 2){
+					$('#imgTypes').attr('src','./img/img_byjb.png');
+				}
+				if(prizesId == 3){
+					$('#imgTypes').attr('src','./img/img_crpa.png');
+				}
+				if(prizesId == 4){
+					$('#imgTypes').attr('src','./img/img_cygg.png');
+				}
+				if(prizesId == 5){
+					$('#imgTypes').attr('src','./img/img_fdts.png');
+				}
+				if(prizesId == 6){
+					$('#imgTypes').attr('src','./img/img_gnww.png');
+				}
+				if(prizesId == 7){
+					$('#imgTypes').attr('src','./img/img_hh.png');
+				}
+				if(prizesId == 8){
+					$('#imgTypes').attr('src','./img/img_hhhh.png');
+				}
+				if(prizesId == 9){
+					$('#imgTypes').attr('src','./img/img_hjak.png');
+				}
+				if(prizesId == 10){
+					$('#imgTypes').attr('src','./img/img_jfcg.png');
+				}
+				if(prizesId == 11){
+					$('#imgTypes').attr('src','./img/img_rchy.png');
+				}
+				if(prizesId == 12){
+					$('#imgTypes').attr('src','./img/img_slhh.png');
+				}
+				if(prizesId == 13){
+					$('#imgTypes').attr('src','./img/img_szjx.png');
+				}
+				if(prizesId == 14){
+					$('#imgTypes').attr('src','./img/img_xkck.png');
+				}
+				if(prizesId == 15){
+					$('#imgTypes').attr('src','./img/img_ylwd.png');
+				}
+		    }
+
+		    // 音乐播放器
+			$(function(){
+				$('.icon-music').click(function(){
+					parent.autoMusic();
+				})
+			})
+		</script>
+	</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<title>开始游戏</title>
+	<link rel="stylesheet" type="text/css" href="css/reset.css"/>
+	<link rel="stylesheet" type="text/css" href="css/drop.css"/>
+	<script src="js/jquery-3.1.1.min.js"></script>
+	<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script type="text/javascript">
+		    function initScale(){
+			    var iWidth=document.documentElement.getBoundingClientRect().width;
+			    iWidth=iWidth>750?750:iWidth;
+			    document.getElementsByTagName("html")[0].style.fontSize=iWidth/3.75+"px";
+		    }
+		    window.onresize=function(){
+		        initScale();
+		    }
+		    initScale();
+	</script>
+	<script type="text/javascript">
+
+		function reload(){
+			window.location.reload();
+		}
+
+		$(function(){
+			// 显示弹框
+			window.requestAnimationFrame= window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+			var i=0;
+			var x=0;  
+			var creatDrop=null;
+			var $bag=$("#bag"),
+				$bottomBox=$("#bottom-box"),
+				$dropWrap=$("#top"),  
+				timer1=null,
+				winWidth=window.innerWidth,
+				winHeight=window.innerHeight-30,
+				topWidth=$("#top").width(),
+				scoreNum=$("#scoreNum"),
+				scoreNum0=$("#scoreNum0"),
+				successBtn=$("#success"),
+				$mask=$('.model-mask');
+			var arr=["<img class='drop' src='img/img_666.png'/>",
+				"<img class='drop' src='img/img_ffzw.png'/>",
+				"<img class='drop' src='img/img_gyz.png'/>",
+				"<img class='drop' src='img/img_lsj.png'/>",
+				"<img class='drop' src='img/img_yqmm.png'/>",
+				"<img class='drop' src='img/img_yqrx.png'/>",
+				"<img class='drop person' src='img/img_zzs.png'/>",
+				"img/dog1.png",
+				"img/dog3.png",
+				"img/pop_rules.png",
+				"img/btn_known.png",
+				"img/btn_tryone.png"
+			]
+
+			// 开始游戏页面显示弹框
+			// var strRule='<img class="rules" src="'+arr[9]+'">';
+			var strRule='<div class="rules bgImage" style="background-image: url('+arr[9]+');"><img class="knowBtn" src="'+arr[10]+'"/></div>';
+			$(".model-mask").show().addClass('ruleBg').append(strRule);
+
+			// 开始游戏
+			$(".start-game").on('click',function(){
+				appendDrop();
+				requestAnimationFrame(dropAnimate);
+				countDown(20);
+				$(".bottom").hide();
+				$("#bag").fadeIn(1000)
+			});
+
+			boxMove($bottomBox,$bag);
+
+			//倒计时
+			function countDown(time){
+				var time=time;
+				var timeDown=null;
+				timeDown=setInterval(function(){
+					$(".time").html(time);
+					time--;
+					if(time<0){
+						time=0;
+						clearInterval(timeDown);
+					}
+				},1000)
+			};
+
+			//生成下落物
+			function appendDrop(){
+				clearInterval(creatDrop);
+				var maxW=$("#top").width()-30;
+				creatDrop=setInterval(function(){
+						var dl=parseInt(Math.random()*(maxW-30+1)+30,10)
+						var i=parseInt(Math.random()*7);
+						var str=arr[i];
+						$("#top").append(str);
+						$(".drop:last").css("left",dl);
+				},600);
+			};
+
+			//下落动画
+			function dropAnimate(){
+				// var _score=parseInt(scoreNum.html());
+				var _score=parseInt(scoreNum0.html());
+				$(".drop").each(function(){
+					var j=parseInt($(this).css('top')+Math.random()*100)
+					j+=4;
+					$(this).css('top',j);
+					if(j>winHeight){
+						$(this).remove();
+					}
+				})
+				catchGold(_score);  //接住下落物
+				if($('.time').html()==0){
+					timeOver(_score)
+				}else{
+					requestAnimationFrame(dropAnimate);
+				}
+			};
+
+			
+
+			// 时间停止后
+			function timeOver(_score){
+				window.cancelAnimationFrame(dropAnimate);
+				$('.drop').hide();
+				clearInterval(creatDrop);
+				var scoreEnd = $("#scoreNum").text(); //最终分数
+				var openID = parent.openid;
+				// 游戏结束随机显示对应的结果
+				$.ajax({
+					type: 'POST',
+					url: 'http://nj.im-cc.com/piccsurvey/GetGoodLuck/random',
+					data: {
+						openid: openID
+					},
+					success: function(data){
+						parent.resultId(data.data,scoreEnd); //传值到父窗口 
+						parent.swiper.slideNext(); //// 时间停止后显示到奖品页面
+					}
+				})
+			}
+
+			function result(){
+				var strRule='<div class="gameOver" style="background-image: url('+arr[9]+');"><p class="text"></p><img class="again" src="'+arr[11]+'"/><img class="goNext" src="'+arr[10]+'"/></div>';
+				$mask.show().append(strRule);
+			}
+
+			//下方篮子的移动
+			function boxMove(bagwrap,bag){
+				var maxLeft=$("#top").offset().left;
+				var maxRight=$("#top").width()+maxLeft;
+				bagwrap.on("touchstart",function(e){
+					var touch = e.originalEvent.targetTouches[0];
+					bag.css("left",touch.pageX-60);
+					if(touch.pageX<maxLeft+60){
+						bag.css("left",maxLeft);
+					}
+					if(touch.pageX>maxRight-60){
+						bag.css("left",maxRight-$("#bag").width());
+					};
+					return false;
+				})
+				bagwrap.on("touchmove",function(e){
+					var touch = e.originalEvent.targetTouches[0];
+					bag.css("left",touch.pageX-60);
+					if(touch.pageX<maxLeft+60){
+						bag.css("left",maxLeft);
+					}
+					if(touch.pageX>maxRight-55){
+						bag.css("left",maxRight-$("#bag").width());
+					};
+					return false;
+				})
+			}
+
+			function catchGold(_score){
+				// 此处显示接福气时显示的狗狗图标
+					// 一开始盘子为空 
+				if(_score==1){
+					$("#bag").find('img').attr('src',arr[7])
+					// 当接到的福气大于6时，显示满盆的狗狗图片
+				}else if(_score>6){
+					$("#bag").find('img').attr('src',arr[8])
+				}
+				$(".drop").each(function(i){
+					var $this=$(this),
+						dropLeft=$this.offset().left,             //福气左边距
+					    dropRight=winWidth-dropLeft-$this.width(),     //福气右边距
+					    dropTop=$this.offset().top+$this.height(),     //福气上边距
+						bagTop=$bag.offset().top+40;                    //篮子上边距
+						bagLeft=$bag.offset().left+20;                  //篮子左边距
+						bagRight=winWidth-bagLeft-$bag.width();      //篮子右边距
+						var l= Math.round(dropLeft-bagLeft),
+						r = Math.round(dropRight-bagRight),
+						t = Math.round(dropTop-bagTop)
+
+					if(l>0&&r>0&&t>0){
+						if($(this).hasClass('person')){
+							x++;
+							$this.remove();
+							_score+=5;
+							var a =_score*100;
+							scoreNum0.html(_score);
+							scoreNum.html(a);
+							if(x==3||x>3){
+								arr[6]="<img class='drop' src='img/img_zzs.png'/>";
+							}
+						}else{
+							$this.remove();
+							_score++;
+							var a =_score*100;
+							// console.log(a,_score,13)
+							scoreNum0.html(_score);
+							scoreNum.html(a);
+						}
+					}
+				})
+			}
+
+			// function getUrlKey(name){
+   //          	return decodeURIComponent((new RegExp('[?|&]'+name+'='+'([^&;]+?)(&|#|;|$)').exec(location.href)||[,""])[1].replace(/\+/g,'%20'))||null;
+   //      	}
+
+			$(".model-cloud").on('click',function(){
+				$(".model-mask").show().addClass('ruleBg').append(strRule);
+				$(".knowBtn").on('click',function(){
+				$(".model-mask").hide().removeClass('ruleBg').append(strRule);
+				})
+			})
+			$(".knowBtn").on('click',function(){
+				$(".model-mask").hide().removeClass('ruleBg').append(strRule);
+			})
+			$(".model-mask").on('click',function(event){
+				var x=event.target;
+				if(x.className=='model-mask ruleBg'){
+					$(this).html("").removeClass('ruleBg').hide();
+				}	
+			})
+
+			// 音乐播放器
+			$(function(){
+				$('.icon-music').click(function(){
+					parent.autoMusic();
+				})
+			})
+		})
+	</script>
+</head>
+<body style="height: 100%; position: relative;background-image: url(img/bg4.jpg); background-size: 100% 100%;">
+	<img class='logo pull-left' src="./img/logo.png"/>
+	<div class=" pull-right music">
+		<img class="icon-music pull-right" src="./img/icon_music.png" />
+	</div>
+		
+	<div class="model-mask"></div>
+	<div class="top-time">
+		<span id="scoreNum0" style="display: none;">0</span>
+		<span id="scoreNum">0</span>
+		<span class="time">20</span>
+	</div>
+	<div id="top" style="">
+		<!-- 获取福气 -->
+	</div>
+	<div id="bottom-box" style="position: absolute;bottom: 0.6rem;width: 99%;height: 50px;">
+		<div id="bag">
+			<img src="img/dog1.png"/>
+		</div>
+	</div>
+	<div class="bottom">
+		<div class=" model-person"></div>
+		<div class=" model-startBtn start-game"></div>
+		<div class=" model-cloud"></div>
+	</div>
+</body>
+</html>
